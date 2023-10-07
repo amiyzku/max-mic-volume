@@ -1,0 +1,45 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug executable 'max-mic-volume'",
+      "cargo": {
+        "args": [
+          "build",
+          "--bin=max-mic-volume",
+          "--package=max-mic-volume"
+        ],
+        "filter": {
+          "name": "max-mic-volume",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in executable 'max-mic-volume'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--bin=max-mic-volume",
+          "--package=max-mic-volume"
+        ],
+        "filter": {
+          "name": "max-mic-volume",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
