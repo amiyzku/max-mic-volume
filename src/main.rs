@@ -21,8 +21,8 @@ fn main() -> Result<(), anyhow::Error> {
         }
 
         let vol = vol.unwrap();
-        if vol != 0 {
-            let result = Mic::set_volume(100);
+        if vol != Volume::MIN_VOLUME {
+            let result = Mic::set_volume(&Volume::MAX_VOLUME);
             if result.is_err() {
                 eprintln!("Failed to set mic volume");
             }
@@ -34,10 +34,31 @@ fn main() -> Result<(), anyhow::Error> {
     std::process::exit(0);
 }
 
+#[derive(Debug)]
+struct Volume(u8);
+
+impl Volume {
+    const MIN: u8 = 0;
+    const MAX: u8 = 100;
+    const MIN_VOLUME: Self = Self(Self::MIN);
+    const MAX_VOLUME: Self = Self(Self::MAX);
+
+    fn new(volume: u8) -> Self {
+        Self(volume.min(Self::MAX).max(Self::MIN))
+    }
+}
+
+impl PartialEq for Volume {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+#[derive(Debug)]
 struct Mic {}
 
 impl Mic {
-    fn get_volume() -> Result<u8, anyhow::Error> {
+    fn get_volume() -> Result<Volume, anyhow::Error> {
         let output = Command::new("osascript")
             .arg("-e")
             .arg("input volume of (get volume settings)")
@@ -47,13 +68,13 @@ impl Mic {
             .trim()
             .parse::<u8>()?;
 
-        Ok(vol)
+        Ok(Volume::new(vol))
     }
 
-    fn set_volume(volume: u8) -> Result<(), anyhow::Error> {
+    fn set_volume(volume: &Volume) -> Result<(), anyhow::Error> {
         Command::new("osascript")
             .arg("-e")
-            .arg(format!("set volume input volume {}", volume))
+            .arg(format!("set volume input volume {}", volume.0))
             .output()?;
 
         Ok(())
@@ -66,8 +87,9 @@ mod tests {
 
     #[test]
     fn control_mic_volume() {
-        Mic::set_volume(50).expect("Failed to set mic volume");
+        let volume = Volume::new(50);
+        Mic::set_volume(&volume).expect("Failed to set mic volume");
         let vol = Mic::get_volume().expect("Failed to get mic volume");
-        assert_eq!(vol, 50);
+        assert_eq!(vol, volume);
     }
 }
