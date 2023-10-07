@@ -2,9 +2,9 @@ name: Rust
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
   workflow_dispatch:
 
 env:
@@ -14,7 +14,26 @@ jobs:
   test:
     runs-on: macos-12
     steps:
-    - uses: actions/checkout@v3
-    - uses: dtolnay/rust-toolchain@stable
-    - name: Run tests
-      run: cargo test --verbose
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Run tests
+        run: cargo test --verbose
+
+  release:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install x86_64-apple-darwin as release target
+        run: rustup target add x86_64-apple-darwin
+
+      - name: Install aarch64-apple-darwin as release target
+        run: rustup target add aarch64-apple-darwin
+
+      - name: Build for x86_64-apple-darwin
+        run: cargo build --release --target x86_64-apple-darwin
+
+      - name: Build for aarch64-apple-darwin
+        run: cargo build --release --target aarch64-apple-darwin
