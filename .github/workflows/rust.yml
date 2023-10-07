@@ -41,7 +41,10 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: Binaries
-          path: |
-            target/x86_64-apple-darwin/release/max-mic-volume
-            target/aarch64-apple-darwin/release/max-mic-volume
+          name: max-mic-volume-x86_64-apple-darwin
+          path: target/x86_64-apple-darwin/release/max-mic-volume
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: max-mic-volume-aarch64-apple-darwin
+          path: target/aarch64-apple-darwin/release/max-mic-volume
