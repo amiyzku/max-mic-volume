@@ -2,6 +2,8 @@
 
 A simple CLI tool to set the microphone volume to the maximum in MacOS.
 
+![behavior](images/behavior.png)
+
 ## Setup as CLI tool
 
 <https://github.com/amiyzku/max-mic-volume/releases>
