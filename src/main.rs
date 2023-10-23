@@ -26,7 +26,8 @@ fn main() -> Result<(), anyhow::Error> {
     })?;
 
     while !shutdown.load(Ordering::SeqCst) {
-        let vol = Mic::get_volume(54);
+        let mic = Mic::new(54);
+        let vol = mic.get_volume();
         if vol.is_err() {
             eprintln!("Failed to get mic volume");
             std::thread::sleep(std::time::Duration::from_secs(3));
@@ -35,7 +36,7 @@ fn main() -> Result<(), anyhow::Error> {
 
         let vol = vol.unwrap();
         if vol != Volume::MIN_VOLUME {
-            let result = Mic::set_volume(&Volume::MAX_VOLUME);
+            let result = mic.set_volume(&Volume::MAX_VOLUME);
             if result.is_err() {
                 eprintln!("Failed to set mic volume");
             }
@@ -68,10 +69,16 @@ impl PartialEq for Volume {
 }
 
 #[derive(Debug)]
-struct Mic {}
+struct Mic {
+    device_id: u32,
+}
 
 impl Mic {
-    fn get_volume(device_id: u32) -> Result<Volume, anyhow::Error> {
+    fn new(device_id: u32) -> Self {
+        Self { device_id }
+    }
+
+    fn get_volume(&self) -> Result<Volume, anyhow::Error> {
         let property_address = AudioObjectPropertyAddress {
             mSelector: kAudioHardwareServiceDeviceProperty_VirtualMasterVolume,
             mScope: kAudioDevicePropertyScopeInput,
@@ -82,7 +89,7 @@ impl Mic {
         let data_size = mem::size_of::<UInt32>();
         let status: OSStatus = unsafe {
             AudioObjectGetPropertyData(
-                device_id,
+                self.device_id,
                 &property_address as *const _,
                 0,
                 null(),
@@ -98,11 +105,29 @@ impl Mic {
         Ok(Volume::new(volume))
     }
 
-    fn set_volume(volume: &Volume) -> Result<(), anyhow::Error> {
-        Command::new("osascript")
-            .arg("-e")
-            .arg(format!("set volume input volume {}", volume.0))
-            .output()?;
+    fn set_volume(&self, volume: &Volume) -> Result<(), anyhow::Error> {
+        let property_address = AudioObjectPropertyAddress {
+            mSelector: kAudioHardwareServiceDeviceProperty_VirtualMasterVolume,
+            mScope: kAudioDevicePropertyScopeInput,
+            mElement: kAudioObjectPropertyElementMaster,
+        };
+
+        let volume: f32 = volume.0;
+        let data_size = mem::size_of::<UInt32>();
+        let status: OSStatus = unsafe {
+            AudioObjectSetPropertyData(
+                self.device_id,
+                &property_address as *const _,
+                0,
+                null(),
+                data_size as _,
+                &volume as *const _ as *mut _,
+            )
+        };
+
+        if status != 0 {
+            return Err(anyhow::anyhow!("Failed to get mic volume"));
+        }
 
         Ok(())
     }
@@ -115,8 +140,10 @@ mod tests {
     #[test]
     fn control_mic_volume() {
         let volume = Volume::new(0.5);
-        Mic::set_volume(&volume).expect("Failed to set mic volume");
-        let vol = Mic::get_volume(54).expect("Failed to get mic volume");
+        let mic = Mic::new(54);
+
+        mic.set_volume(&volume).expect("Failed to set mic volume");
+        let vol = mic.get_volume().expect("Failed to get mic volume");
         assert_eq!(vol, volume);
     }
 }
