@@ -1,22 +1,17 @@
 use std::mem;
-use std::process::Command;
 use std::ptr::null;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 use anyhow::Result;
-use coreaudio::audio_unit::macos_helpers::get_audio_device_ids_for_scope;
 use coreaudio_sys::{
-    kAudioDevicePropertyDeviceNameCFString, kAudioDevicePropertyMute,
-    kAudioDevicePropertyScopeInput, kAudioDevicePropertyScopeOutput, kAudioHardwareNoError,
-    kAudioHardwarePropertyDefaultInputDevice, kAudioHardwarePropertyDefaultOutputDevice,
-    kAudioHardwareServiceDeviceProperty_VirtualMasterVolume, kAudioObjectPropertyElementMaster,
-    kAudioObjectPropertyScopeGlobal, kAudioObjectSystemObject, kCFStringEncodingUTF8,
-    AudioDeviceID, AudioHardwareServiceGetPropertyData, AudioObjectGetPropertyData,
-    AudioObjectPropertyAddress, AudioObjectSetPropertyData, CFStringGetCString, CFStringRef,
-    OSStatus, UInt32,
+    kAudioDevicePropertyScopeInput, kAudioHardwareServiceDeviceProperty_VirtualMasterVolume,
+    kAudioObjectPropertyElementMaster, AudioObjectGetPropertyData, AudioObjectPropertyAddress,
+    AudioObjectSetPropertyData, OSStatus, UInt32,
 };
 use ctrlc;
+
+mod helper;
 
 fn main() -> Result<(), anyhow::Error> {
     let shutdown = Arc::new(AtomicBool::new(false));
@@ -26,7 +21,9 @@ fn main() -> Result<(), anyhow::Error> {
     })?;
 
     while !shutdown.load(Ordering::SeqCst) {
-        let mic = Mic::new(54);
+        let device_id =
+            helper::get_default_input_device_id().expect("Failed to get default input device id");
+        let mic = MicDevice::new(device_id);
         let vol = mic.get_volume();
         if vol.is_err() {
             eprintln!("Failed to get mic volume");
@@ -69,11 +66,11 @@ impl PartialEq for Volume {
 }
 
 #[derive(Debug)]
-struct Mic {
+struct MicDevice {
     device_id: u32,
 }
 
-impl Mic {
+impl MicDevice {
     fn new(device_id: u32) -> Self {
         Self { device_id }
     }
@@ -139,8 +136,10 @@ mod tests {
 
     #[test]
     fn control_mic_volume() {
+        let device_id =
+            helper::get_default_input_device_id().expect("Failed to get default input device id");
+        let mic = MicDevice::new(device_id);
         let volume = Volume::new(0.5);
-        let mic = Mic::new(54);
 
         mic.set_volume(&volume).expect("Failed to set mic volume");
         let vol = mic.get_volume().expect("Failed to get mic volume");
