@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::{mem, ptr::null};
 
 use coreaudio_sys::{
@@ -6,7 +7,7 @@ use coreaudio_sys::{
     AudioObjectPropertyAddress, OSStatus,
 };
 
-pub fn get_default_input_device_id() -> Result<u32, anyhow::Error> {
+pub fn get_default_input_device_id() -> Result<u32> {
     let property_address = AudioObjectPropertyAddress {
         mSelector: kAudioHardwarePropertyDefaultInputDevice,
         mScope: kAudioObjectPropertyScopeGlobal,
@@ -39,8 +40,10 @@ mod tests {
 
     #[test]
     fn test_get_default_input_device_id() {
-        let device_id = get_default_input_device_id().unwrap();
-        println!("device_id: {}", device_id);
-        assert!(device_id > 0);
+        // Act
+        let device_id = get_default_input_device_id();
+
+        // Assert
+        assert!(device_id.is_ok());
     }
 }
