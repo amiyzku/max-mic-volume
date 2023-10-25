@@ -12,8 +12,10 @@ A simple CLI tool to set the microphone volume to the maximum in MacOS.
 
 ```bash
 sudo mv max-mic-volume /usr/local/bin/
+sudo chmod 755 /usr/local/bin/max-mic-volume
 
-sudo curl -o /Library/LaunchDaemons/com.github.amiyzku.max-mic-volume.plist https://raw.githubusercontent.com/amiyzku/max-mic-volume/master/com.github.amiyzku.max-mic-volume.plist
-sudo chown root:wheel /Library/LaunchDaemons/com.github.amiyzku.max-mic-volume.plist
-sudo chmod 644 /Library/LaunchDaemons/com.github.amiyzku.max-mic-volume.plist
+sudo curl -o /Library/LaunchAgents/com.github.amiyzku.max-mic-volume.plist https://raw.githubusercontent.com/amiyzku/max-mic-volume/master/com.github.amiyzku.max-mic-volume.plist
+sudo chmod 644 /Library/LaunchAgents/com.github.amiyzku.max-mic-volume.plist
+
+launchctl load /Library/LaunchAgents/com.github.amiyzku.max-mic-volume.plist
 ```
