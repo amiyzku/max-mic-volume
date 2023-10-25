@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{ensure, Result};
 use std::{mem, ptr::null};
 
 use coreaudio_sys::{
@@ -8,18 +8,13 @@ use coreaudio_sys::{
 };
 
 pub fn get_default_input_device_id() -> Result<u32> {
-    let property_address = AudioObjectPropertyAddress {
-        mSelector: kAudioHardwarePropertyDefaultInputDevice,
-        mScope: kAudioObjectPropertyScopeGlobal,
-        mElement: kAudioObjectPropertyElementMaster,
-    };
-
     let mut device_id: u32 = 0;
     let data_size = mem::size_of::<u32>();
+
     let status: OSStatus = unsafe {
         AudioObjectGetPropertyData(
             kAudioObjectSystemObject,
-            &property_address as *const _,
+            &create_property_address() as *const _,
             0,
             null(),
             &data_size as *const _ as *mut _,
@@ -27,11 +22,17 @@ pub fn get_default_input_device_id() -> Result<u32> {
         )
     };
 
-    if status != 0 {
-        return Err(anyhow::anyhow!("Failed to get default input device"));
-    }
+    ensure!(status == 0, "Failed to get default input device");
 
     Ok(device_id)
+}
+
+const fn create_property_address() -> AudioObjectPropertyAddress {
+    AudioObjectPropertyAddress {
+        mSelector: kAudioHardwarePropertyDefaultInputDevice,
+        mScope: kAudioObjectPropertyScopeGlobal,
+        mElement: kAudioObjectPropertyElementMaster,
+    }
 }
 
 #[cfg(test)]
@@ -41,9 +42,9 @@ mod tests {
     #[test]
     fn test_get_default_input_device_id() {
         // Act
-        let device_id = get_default_input_device_id();
+        let sut = get_default_input_device_id();
 
         // Assert
-        assert!(device_id.is_ok());
+        assert!(sut.is_ok());
     }
 }

@@ -14,6 +14,10 @@ impl Volume {
     pub fn value(&self) -> f32 {
         self.0
     }
+
+    pub fn is_mute(&self) -> bool {
+        self == &Self::MIN_VOLUME
+    }
 }
 
 impl PartialEq for Volume {
@@ -32,10 +36,10 @@ mod tests {
         let volume = 1.1;
 
         // Act
-        let result = Volume::new(volume);
+        let sut = Volume::new(volume);
 
         // Assert
-        assert_eq!(result, Volume::MAX_VOLUME);
+        assert_eq!(sut, Volume::MAX_VOLUME);
     }
 
     #[test]
@@ -44,9 +48,47 @@ mod tests {
         let volume = -0.1;
 
         // Act
-        let result = Volume::new(volume);
+        let sut = Volume::new(volume);
 
         // Assert
-        assert_eq!(result, Volume::MIN_VOLUME);
+        assert_eq!(sut, Volume::MIN_VOLUME);
+    }
+
+    #[test]
+    fn can_create_a_volume_between_min_and_max() {
+        // Arrange
+        let volume = 0.5;
+
+        // Act
+        let sut = Volume::new(volume);
+
+        // Assert
+        assert_eq!(sut, Volume(volume));
+    }
+
+    #[test]
+    fn can_get_the_value_of_a_volume() {
+        // Arrange
+        let volume = 0.5;
+        let sut = Volume::new(volume);
+
+        // Act
+        let result = sut.value();
+
+        // Assert
+        assert_eq!(result, volume);
+    }
+
+    #[test]
+    fn can_check_if_a_volume_is_mute() {
+        // Arrange
+        let volume = 0.0;
+        let sut = Volume::new(volume);
+
+        // Act
+        let result = sut.is_mute();
+
+        // Assert
+        assert!(result);
     }
 }

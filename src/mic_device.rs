@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{ensure, Result};
 use coreaudio_sys::{
     kAudioDevicePropertyScopeInput, kAudioHardwareServiceDeviceProperty_VirtualMasterVolume,
     kAudioObjectPropertyElementMaster, AudioObjectGetPropertyData, AudioObjectPropertyAddress,
@@ -34,9 +34,7 @@ impl MicDevice {
             )
         };
 
-        if status != 0 {
-            return Err(anyhow::anyhow!("Failed to get mic volume"));
-        }
+        ensure!(status == 0, "Failed to get mic volume");
 
         Ok(Volume::new(volume))
     }
@@ -56,9 +54,7 @@ impl MicDevice {
             )
         };
 
-        if status != 0 {
-            return Err(anyhow::anyhow!("Failed to get mic volume"));
-        }
+        ensure!(status == 0, "Failed to set mic volume");
 
         Ok(())
     }
@@ -82,12 +78,12 @@ mod tests {
         // Arrange
         let device_id =
             helper::get_default_input_device_id().expect("Failed to get default input device id");
-        let mic = MicDevice::new(device_id);
+        let sut = MicDevice::new(device_id);
         let expected = Volume::new(0.5);
-        mic.set_volume(&expected).expect("Failed to set mic volume");
+        sut.set_volume(&expected).expect("Failed to set mic volume");
 
         // Act
-        let vol = mic.get_volume().expect("Failed to get mic volume");
+        let vol = sut.get_volume().expect("Failed to get mic volume");
 
         // Assert
         assert_eq!(vol, expected);
@@ -98,11 +94,11 @@ mod tests {
         // Arrange
         let device_id =
             helper::get_default_input_device_id().expect("Failed to get default input device id");
-        let mic = MicDevice::new(device_id);
+        let sut = MicDevice::new(device_id);
         let volume = Volume::new(0.5);
 
         // Act
-        let result = mic.set_volume(&volume);
+        let result = sut.set_volume(&volume);
 
         // Assert
         assert!(result.is_ok());

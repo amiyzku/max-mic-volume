@@ -19,9 +19,14 @@ fn main() -> Result<()> {
     })?;
 
     while !shutdown.load(Ordering::SeqCst) {
-        let device_id =
-            helper::get_default_input_device_id().expect("Failed to get default input device id");
-        let mic = MicDevice::new(device_id);
+        let device_id = helper::get_default_input_device_id();
+        if device_id.is_err() {
+            eprintln!("Failed to get default input device id");
+            std::thread::sleep(std::time::Duration::from_secs(3));
+            continue;
+        }
+
+        let mic = MicDevice::new(device_id.unwrap());
         let vol = mic.get_volume();
         if vol.is_err() {
             eprintln!("Failed to get mic volume");
@@ -29,12 +34,14 @@ fn main() -> Result<()> {
             continue;
         }
 
-        let vol = vol.unwrap();
-        if vol != Volume::MIN_VOLUME {
-            let result = mic.set_volume(&Volume::MAX_VOLUME);
-            if result.is_err() {
-                eprintln!("Failed to set mic volume");
-            }
+        if vol.unwrap().is_mute() {
+            continue;
+        }
+
+        if mic.set_volume(&Volume::MAX_VOLUME).is_err() {
+            eprintln!("Failed to set mic volume");
+            std::thread::sleep(std::time::Duration::from_secs(3));
+            continue;
         }
 
         std::thread::sleep(std::time::Duration::from_secs(3));
