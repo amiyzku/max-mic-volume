@@ -34,7 +34,9 @@ fn main() -> Result<()> {
             continue;
         }
 
-        if vol.unwrap().is_mute() {
+        let vol = vol.unwrap();
+        if vol.is_mute() || vol.is_max() {
+            std::thread::sleep(std::time::Duration::from_secs(3));
             continue;
         }
 

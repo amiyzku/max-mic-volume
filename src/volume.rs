@@ -18,6 +18,10 @@ impl Volume {
     pub fn is_mute(&self) -> bool {
         self == &Self::MIN_VOLUME
     }
+
+    pub fn is_max(&self) -> bool {
+        self == &Self::MAX_VOLUME
+    }
 }
 
 #[cfg(test)]
@@ -81,6 +85,19 @@ mod tests {
 
         // Act
         let result = sut.is_mute();
+
+        // Assert
+        assert!(result);
+    }
+
+    #[test]
+    fn can_check_if_a_volume_is_max() {
+        // Arrange
+        let volume = 1.0;
+        let sut = Volume::new(volume);
+
+        // Act
+        let result = sut.is_max();
 
         // Assert
         assert!(result);
