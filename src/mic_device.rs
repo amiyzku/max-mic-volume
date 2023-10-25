@@ -19,7 +19,7 @@ impl MicDevice {
         Self { device_id }
     }
 
-    pub fn get_volume(&self) -> Result<Volume> {
+    pub fn volume(&self) -> Result<Volume> {
         let volume: f32 = 0.0;
         let data_size = mem::size_of::<UInt32>();
 
@@ -83,7 +83,7 @@ mod tests {
         sut.set_volume(&expected).expect("Failed to set mic volume");
 
         // Act
-        let vol = sut.get_volume().expect("Failed to get mic volume");
+        let vol = sut.volume().expect("Failed to get mic volume");
 
         // Assert
         assert_eq!(vol, expected);

@@ -27,7 +27,7 @@ fn main() -> Result<()> {
         }
 
         let mic = MicDevice::new(device_id.unwrap());
-        let vol = mic.get_volume();
+        let vol = mic.volume();
         if vol.is_err() {
             eprintln!("Failed to get mic volume");
             std::thread::sleep(std::time::Duration::from_secs(3));
