@@ -9,7 +9,7 @@ use std::ptr::null;
 
 use crate::volume::Volume;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct MicDevice {
     device_id: u32,
 }
