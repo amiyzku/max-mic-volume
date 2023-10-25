@@ -2,9 +2,11 @@ name: Rust
 
 on:
   push:
-    branches: ["master"]
+    branches: ['master']
+    paths: ['*.rs', 'Cargo.toml']
   pull_request:
-    branches: ["master"]
+    branches: ['master']
+    paths: ['*.rs', 'Cargo.toml']
   workflow_dispatch:
 
 env:
