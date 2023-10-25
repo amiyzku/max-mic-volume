@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq, PartialOrd)]
 pub struct Volume(f32);
 
 impl Volume {
@@ -17,12 +17,6 @@ impl Volume {
 
     pub fn is_mute(&self) -> bool {
         self == &Self::MIN_VOLUME
-    }
-}
-
-impl PartialEq for Volume {
-    fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0
     }
 }
 
