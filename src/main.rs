@@ -7,19 +7,14 @@ use anyhow::Result;
 use clap::Parser;
 use ctrlc;
 
+mod cli;
 mod helper;
 mod mic_device;
 mod volume;
 
+use cli::Cli;
 use mic_device::MicDevice;
 use volume::Volume;
-
-#[derive(Parser)]
-#[command(author, version, about, long_about = None)]
-struct Cli {
-    #[clap(short, long, default_value = "3000")]
-    polling_interval_ms: u64,
-}
 
 fn main() -> Result<()> {
     let args = Cli::parse();
