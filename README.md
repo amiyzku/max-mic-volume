@@ -5,6 +5,21 @@ However, it does not maximize when muted.
 
 ![behavior](images/behavior.png)
 
+## Usage
+
+```bash
+$ ./max-mic-volume --help
+A simple CLI tool to set the microphone volume to the maximum in MacOS
+
+Usage: max-mic-volume [OPTIONS]
+
+Options:
+  -p, --polling-interval-ms <POLLING_INTERVAL_MS>  [default: 3000]
+  -h, --help                                       Print help
+  -V, --version                                    Print version
+
+```
+
 ## Setup as CLI tool
 
 <https://github.com/amiyzku/max-mic-volume/releases>
